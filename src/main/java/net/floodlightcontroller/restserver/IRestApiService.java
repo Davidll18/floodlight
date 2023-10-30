@@ -16,6 +16,7 @@
 
 package net.floodlightcontroller.restserver;
 
+import net.floodlightcontroller.core.FloodlightContextStore;
 import net.floodlightcontroller.core.module.IFloodlightService;
 
 public interface IRestApiService extends IFloodlightService {
@@ -29,4 +30,6 @@ public interface IRestApiService extends IFloodlightService {
      * Runs the REST API server
      */
     public void run();
+
+    FloodlightContextStore getImplementingModules();
 }
