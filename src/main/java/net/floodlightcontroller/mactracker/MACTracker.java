@@ -33,7 +33,7 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 
     @Override
     public boolean isCallbackOrderingPrereq(OFType type, String name) {
-        return false;
+        return type.equals(OFType.PACKET_IN) && name.equalsIgnoreCase("forwarding");
     }
 
     @Override
@@ -42,17 +42,12 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
     }
 
     @Override
-    public net.floodlightcontroller.core.IListener.Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-        Ethernet eth =
-                IFloodlightProviderService.bcStore.get(cntx,
-                        IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
-
+    public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
+        Ethernet eth = IFloodlightProviderService.bcStore.get(cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
         Long sourceMACHash = eth.getSourceMACAddress().getLong();
         if (!macAddresses.contains(sourceMACHash)) {
             macAddresses.add(sourceMACHash);
-            logger.info("MAC Address: {} seen on switch: {}",
-                    eth.getSourceMACAddress().toString(),
-                    sw.getId().toString());
+            logger.info("MAC Address: {} seen on switch: {}", eth.getSourceMACAddress().toString(), sw.getId().toString());
         }
         return Command.CONTINUE;
     }
