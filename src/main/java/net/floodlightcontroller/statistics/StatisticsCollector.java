@@ -1,14 +1,10 @@
 package net.floodlightcontroller.statistics;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.Thread.State;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +39,8 @@ import net.floodlightcontroller.topology.NodePortTuple;
 
 public class StatisticsCollector implements IFloodlightModule, IStatisticsService {
 	private static final Logger log = LoggerFactory.getLogger(StatisticsCollector.class);
-
+	private int PortRxThreshold;
+	private int PortTxThreshold;
 	private static IOFSwitchService switchService;
 	private static IThreadPoolService threadPoolService;
 	private static IRestApiService restApiService;
@@ -464,4 +461,29 @@ public class StatisticsCollector implements IFloodlightModule, IStatisticsServic
 		}
 		return values;
 	}
+
+
+
+	public void collectPortStatistics(int port, int txBandwidth, int rxBandwidth) {
+		// Comparar los valores de ancho de banda con los umbrales
+		if (txBandwidth > PortTxThreshold) {
+			System.out.println("El ancho de banda de transmisión en el puerto " + port + " ha superado el umbral.");
+		}
+		if (rxBandwidth > PortRxThreshold) {
+			System.out.println("El ancho de banda de recepción en el puerto " + port + " ha superado el umbral.");
+		}
+	}
+	private void loadThresholdsFromPropertiesFile() {
+		// Cargar los umbrales desde el archivo de propiedades
+		Properties properties = new Properties();
+		try {
+			properties.load(new FileInputStream("floodlightdefault.properties"));
+			PortTxThreshold = Integer.parseInt(properties.getProperty("PortTxThreshold"));
+			PortRxThreshold = Integer.parseInt(properties.getProperty("PortRxThreshold"));
+		} catch (IOException e) {
+			// Manejar errores al cargar el archivo de propiedades
+			e.printStackTrace();
+		}
+	}
+
 }
